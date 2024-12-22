@@ -5,39 +5,14 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"os/exec"
 	"os/signal"
-	"runtime"
 
 	"github.com/zserge/lorca"
 )
 
-func checkChrome() error {
-	var cmd *exec.Cmd
-	switch runtime.GOOS {
-	case "linux":
-		cmd = exec.Command("which", "google-chrome")
-	case "darwin":
-		cmd = exec.Command("which", "google-chrome")
-	case "windows":
-		cmd = exec.Command("where", "chrome.exe")
-	default:
-		return fmt.Errorf("unsupported operating system")
-	}
-
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("Chrome/Chromium is not installed. Please install it first")
-	}
-	return nil
-}
-
 func main() {
-	if err := checkChrome(); err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-	// Create UI with specific Chrome flags
-	ui, err := lorca.New("", "", 800, 600, "--start-maximized", "--disable-sync")
+	// Create UI with basic HTML passed via data URI
+	ui, err := lorca.New("", "", 800, 600)
 	if err != nil {
 		fmt.Println("Error creating UI:", err)
 		return
