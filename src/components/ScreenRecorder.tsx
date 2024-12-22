@@ -311,12 +311,13 @@ const ScreenRecorder = () => {
                     height: selectedRegion.height + 'px'
                   }}
                   onMouseDown={(e) => {
-                    if (e.target === e.currentTarget) {
+                    if (e.target === e.currentTarget && videoRef.current) {
                       e.stopPropagation();
+                      const rect = videoRef.current.getBoundingClientRect();
                       setIsDragging(true);
                       setDragStart({ 
-                        x: e.clientX - selectedRegion.x, 
-                        y: e.clientY - selectedRegion.y 
+                        x: e.clientX - rect.left - selectedRegion.x, 
+                        y: e.clientY - rect.top - selectedRegion.y 
                       });
                     }
                   }}
