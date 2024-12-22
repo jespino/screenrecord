@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, MouseEvent } from 'react';
 import RecordRTC from 'recordrtc';
 
 const ScreenRecorder = () => {
@@ -7,6 +7,52 @@ const ScreenRecorder = () => {
   const recorderRef = useRef<RecordRTC | null>(null);
   const [selectedWindow, setSelectedWindow] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isSelectingRegion, setIsSelectingRegion] = useState(false);
+  const [regionStart, setRegionStart] = useState<{ x: number; y: number } | null>(null);
+  const [regionEnd, setRegionEnd] = useState<{ x: number; y: number } | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+
+  const selectRegion = () => {
+    setIsSelectingRegion(true);
+    setSelectedRegion(null);
+  };
+
+  const handleMouseDown = (e: MouseEvent) => {
+    if (!isSelectingRegion || !videoRef.current) return;
+
+    const rect = videoRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setRegionStart({ x, y });
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isSelectingRegion || !regionStart || !videoRef.current) return;
+
+    const rect = videoRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setRegionEnd({ x, y });
+  };
+
+  const handleMouseUp = () => {
+    if (!isSelectingRegion || !regionStart || !regionEnd) return;
+
+    const x = Math.min(regionStart.x, regionEnd.x);
+    const y = Math.min(regionStart.y, regionEnd.y);
+    const width = Math.abs(regionEnd.x - regionStart.x);
+    const height = Math.abs(regionEnd.y - regionStart.y);
+
+    setSelectedRegion({ x, y, width, height });
+    setIsSelectingRegion(false);
+    setRegionStart(null);
+    setRegionEnd(null);
+  };
 
   const selectWindow = async () => {
     try {
@@ -21,7 +67,9 @@ const ScreenRecorder = () => {
       }
 
       const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
+        video: {
+          displaySurface: 'window',
+        },
         audio: false
       });
       
@@ -49,8 +97,49 @@ const ScreenRecorder = () => {
       return;
     }
     try {
-      // Use the selected window stream
-      const screenStream = selectedWindow;
+      let screenStream = selectedWindow;
+      
+      // If region is selected, create a canvas to crop the video
+      if (selectedRegion && videoRef.current) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = selectedRegion.width;
+        canvas.height = selectedRegion.height;
+        
+        const videoTrack = screenStream.getVideoTracks()[0];
+        const processor = new MediaStreamTrackProcessor({ track: videoTrack });
+        const generator = new MediaStreamTrackGenerator({ kind: 'video' });
+        
+        const transformer = new TransformStream({
+          transform: async (videoFrame, controller) => {
+            if (ctx) {
+              ctx.drawImage(
+                videoFrame,
+                selectedRegion.x,
+                selectedRegion.y,
+                selectedRegion.width,
+                selectedRegion.height,
+                0,
+                0,
+                canvas.width,
+                canvas.height
+              );
+            }
+            videoFrame.close();
+            const newFrame = new VideoFrame(canvas, {
+              timestamp: videoFrame.timestamp,
+            });
+            controller.enqueue(newFrame);
+          },
+        });
+
+        processor.readable
+          .pipeThrough(transformer)
+          .pipeTo(generator.writable);
+
+        screenStream = new MediaStream([generator]);
+      }
 
       // Get microphone stream
       const micStream = await navigator.mediaDevices.getUserMedia({
@@ -113,16 +202,49 @@ const ScreenRecorder = () => {
       <p>Records both your screen and microphone audio</p>
       
       <div className="window-preview">
-        <button onClick={selectWindow}>Select Window</button>
+        <div>
+          <button onClick={selectWindow}>Select Window</button>
+          <button onClick={selectRegion} disabled={!selectedWindow}>
+            Select Region
+          </button>
+        </div>
         {selectedWindow && (
           <>
-            <video 
-              ref={videoRef} 
-              autoPlay 
-              playsInline 
-              muted 
-              className="preview-video"
-            />
+            <div className="video-container"
+                 onMouseDown={handleMouseDown}
+                 onMouseMove={handleMouseMove}
+                 onMouseUp={handleMouseUp}
+                 onMouseLeave={handleMouseUp}>
+              <video 
+                ref={videoRef} 
+                autoPlay 
+                playsInline 
+                muted 
+                className="preview-video"
+              />
+              {(isSelectingRegion && regionStart && regionEnd) && (
+                <div 
+                  className="region-selector"
+                  style={{
+                    left: Math.min(regionStart.x, regionEnd.x) + 'px',
+                    top: Math.min(regionStart.y, regionEnd.y) + 'px',
+                    width: Math.abs(regionEnd.x - regionStart.x) + 'px',
+                    height: Math.abs(regionEnd.y - regionStart.y) + 'px'
+                  }}
+                />
+              )}
+              {selectedRegion && (
+                <div 
+                  className="region-selector"
+                  style={{
+                    left: selectedRegion.x + 'px',
+                    top: selectedRegion.y + 'px',
+                    width: selectedRegion.width + 'px',
+                    height: selectedRegion.height + 'px'
+                  }}
+                />
+              )}
+            </div>
           </>
         )}
       </div>
