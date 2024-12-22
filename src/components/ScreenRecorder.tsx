@@ -107,38 +107,29 @@ const ScreenRecorder = () => {
         canvas.width = selectedRegion.width;
         canvas.height = selectedRegion.height;
         
-        const videoTrack = screenStream.getVideoTracks()[0];
-        const processor = new MediaStreamTrackProcessor({ track: videoTrack });
-        const generator = new MediaStreamTrackGenerator({ kind: 'video' });
+        // Create a stream from the canvas
+        const canvasStream = canvas.captureStream();
         
-        const transformer = new TransformStream({
-          transform: async (videoFrame, controller) => {
-            if (ctx) {
-              ctx.drawImage(
-                videoFrame,
-                selectedRegion.x,
-                selectedRegion.y,
-                selectedRegion.width,
-                selectedRegion.height,
-                0,
-                0,
-                canvas.width,
-                canvas.height
-              );
-            }
-            videoFrame.close();
-            const newFrame = new VideoFrame(canvas, {
-              timestamp: videoFrame.timestamp,
-            });
-            controller.enqueue(newFrame);
-          },
-        });
-
-        processor.readable
-          .pipeThrough(transformer)
-          .pipeTo(generator.writable);
-
-        screenStream = new MediaStream([generator]);
+        // Update canvas with cropped video frame
+        const drawFrame = () => {
+          if (ctx && videoRef.current) {
+            ctx.drawImage(
+              videoRef.current,
+              selectedRegion.x,
+              selectedRegion.y,
+              selectedRegion.width,
+              selectedRegion.height,
+              0,
+              0,
+              canvas.width,
+              canvas.height
+            );
+          }
+          requestAnimationFrame(drawFrame);
+        };
+        
+        drawFrame();
+        screenStream = canvasStream;
       }
 
       // Get microphone stream
