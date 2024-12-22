@@ -162,12 +162,13 @@ const ScreenRecorder = () => {
         const blob = recorderRef.current?.getBlob();
         if (blob) {
           setRecordedBlob(blob);
-          // Stop all tracks
           // Stop all tracks from both screen and microphone
-          const stream = recorderRef.current.getInternalRecorder().stream;
-          stream.getTracks().forEach(track => {
-            track.stop();
-          });
+          const internalRecorder = recorderRef.current.getInternalRecorder();
+          if (internalRecorder && internalRecorder.stream) {
+            internalRecorder.stream.getTracks().forEach(track => {
+              track.stop();
+            });
+          }
         }
       });
       setIsRecording(false);
