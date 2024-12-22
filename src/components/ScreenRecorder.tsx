@@ -12,11 +12,7 @@ const ScreenRecorder = () => {
   const selectWindow = async () => {
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: {
-          displaySurface: 'monitor',
-          cursor: 'always',
-          selfBrowserSurface: 'exclude'
-        },
+        video: true,
         audio: false
       });
       
@@ -24,6 +20,7 @@ const ScreenRecorder = () => {
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        await videoRef.current.play().catch(e => console.error('Error playing video:', e));
       }
     } catch (err) {
       console.error('Error selecting window:', err);
