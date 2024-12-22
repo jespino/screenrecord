@@ -18,6 +18,8 @@ const ScreenRecorder = () => {
     scaleX: number;
     scaleY: number;
   } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
 
 
   const handleMouseDown = (e: MouseEvent) => {
@@ -31,16 +33,31 @@ const ScreenRecorder = () => {
   };
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isSelectingRegion || !regionStart || !videoRef.current) return;
-
+    if (!videoRef.current) return;
+    
     const rect = videoRef.current.getBoundingClientRect();
-    // Constrain coordinates within preview bounds
-    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
-    setRegionEnd({ x, y });
+
+    if (isSelectingRegion && regionStart) {
+      // Handle region selection
+      const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+      setRegionEnd({ x, y });
+    } else if (isDragging && dragStart && selectedRegion) {
+      // Handle region dragging
+      const newX = Math.max(0, Math.min(e.clientX - dragStart.x - rect.left, rect.width - selectedRegion.width));
+      const newY = Math.max(0, Math.min(e.clientY - dragStart.y - rect.top, rect.height - selectedRegion.height));
+      
+      setSelectedRegion({
+        ...selectedRegion,
+        x: newX,
+        y: newY
+      });
+    }
   };
 
   const handleMouseUp = () => {
+    setIsDragging(false);
+    setDragStart(null);
     if (!isSelectingRegion || !regionStart || !regionEnd || !videoRef.current || !selectedWindow) return;
 
     const videoElement = videoRef.current;
@@ -257,6 +274,16 @@ const ScreenRecorder = () => {
                     top: selectedRegion.y + 'px',
                     width: selectedRegion.width + 'px',
                     height: selectedRegion.height + 'px'
+                  }}
+                  onMouseDown={(e) => {
+                    if (e.target === e.currentTarget) {
+                      e.stopPropagation();
+                      setIsDragging(true);
+                      setDragStart({ 
+                        x: e.clientX - selectedRegion.x, 
+                        y: e.clientY - selectedRegion.y 
+                      });
+                    }
                   }}
                 >
                   <div 
