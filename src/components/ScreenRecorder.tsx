@@ -258,7 +258,44 @@ const ScreenRecorder = () => {
                     width: selectedRegion.width + 'px',
                     height: selectedRegion.height + 'px'
                   }}
-                />
+                >
+                  <div 
+                    className="resize-handle top-left"
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      setRegionStart({ x: selectedRegion.x + selectedRegion.width, y: selectedRegion.y + selectedRegion.height });
+                      setRegionEnd({ x: selectedRegion.x, y: selectedRegion.y });
+                      setIsSelectingRegion(true);
+                    }}
+                  />
+                  <div 
+                    className="resize-handle top-right"
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      setRegionStart({ x: selectedRegion.x, y: selectedRegion.y + selectedRegion.height });
+                      setRegionEnd({ x: selectedRegion.x + selectedRegion.width, y: selectedRegion.y });
+                      setIsSelectingRegion(true);
+                    }}
+                  />
+                  <div 
+                    className="resize-handle bottom-left"
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      setRegionStart({ x: selectedRegion.x + selectedRegion.width, y: selectedRegion.y });
+                      setRegionEnd({ x: selectedRegion.x, y: selectedRegion.y + selectedRegion.height });
+                      setIsSelectingRegion(true);
+                    }}
+                  />
+                  <div 
+                    className="resize-handle bottom-right"
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      setRegionStart({ x: selectedRegion.x, y: selectedRegion.y });
+                      setRegionEnd({ x: selectedRegion.x + selectedRegion.width, y: selectedRegion.y + selectedRegion.height });
+                      setIsSelectingRegion(true);
+                    }}
+                  />
+                </div>
               )}
             </div>
           </>

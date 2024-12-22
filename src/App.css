@@ -51,7 +51,41 @@ button {
   position: absolute;
   border: 2px solid #ff0000;
   background-color: rgba(255, 0, 0, 0.2);
-  pointer-events: none;
+}
+
+.resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: white;
+  border: 2px solid #ff0000;
+  border-radius: 50%;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.resize-handle.top-left { 
+  top: -6px;
+  left: -6px;
+  cursor: nw-resize;
+}
+
+.resize-handle.top-right {
+  top: -6px;
+  right: -6px;
+  cursor: ne-resize;
+}
+
+.resize-handle.bottom-left {
+  bottom: -6px;
+  left: -6px;
+  cursor: sw-resize;
+}
+
+.resize-handle.bottom-right {
+  bottom: -6px;
+  right: -6px;
+  cursor: se-resize;
 }
 
 .video-container {
