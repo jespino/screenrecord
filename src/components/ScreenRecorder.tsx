@@ -1,25 +1,42 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import RecordRTC from 'recordrtc';
 
 const ScreenRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const recorderRef = useRef<RecordRTC | null>(null);
+  const [selectedWindow, setSelectedWindow] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const startRecording = async () => {
+  const selectWindow = async () => {
     try {
-      // Get screen stream
-      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+      const stream = await navigator.mediaDevices.getDisplayMedia({
         video: {
           displaySurface: 'monitor',
           cursor: 'always',
           selfBrowserSurface: 'exclude'
         },
-        audio: true,
-        preferCurrentTab: false,
-        selfBrowserSurface: 'exclude',
-        systemAudio: 'include'
+        audio: false
       });
+      
+      setSelectedWindow(stream);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      console.error('Error selecting window:', err);
+    }
+  };
+
+  const startRecording = async () => {
+    if (!selectedWindow) {
+      alert('Please select a window first');
+      return;
+    }
+    try {
+      // Use the selected window stream
+      const screenStream = selectedWindow;
 
       // Get microphone stream
       const micStream = await navigator.mediaDevices.getUserMedia({
@@ -80,6 +97,20 @@ const ScreenRecorder = () => {
     <div className="screen-recorder">
       <h2>Screen & Microphone Recorder</h2>
       <p>Records both your screen and microphone audio</p>
+      
+      <div className="window-preview">
+        <button onClick={selectWindow}>Select Window</button>
+        {selectedWindow && (
+          <video 
+            ref={videoRef} 
+            autoPlay 
+            playsInline 
+            muted 
+            className="preview-video"
+          />
+        )}
+      </div>
+
       <div className="controls">
         {!isRecording ? (
           <button onClick={startRecording}>Start Recording</button>
