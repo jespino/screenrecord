@@ -277,7 +277,6 @@ const ScreenRecorder = () => {
             Select Region
           </button>
         </div>
-        {selectedWindow && (
           <>
             <div className="video-container"
                  onMouseDown={handleMouseDown}
@@ -363,7 +362,6 @@ const ScreenRecorder = () => {
               )}
             </div>
           </>
-        )}
       </div>
 
       <div className="controls">
