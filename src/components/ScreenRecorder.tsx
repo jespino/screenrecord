@@ -4,6 +4,7 @@ import RecordRTC from 'recordrtc';
 const ScreenRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const [recordMicrophone, setRecordMicrophone] = useState(true);
   const recorderRef = useRef<RecordRTC | null>(null);
   const [selectedWindow, setSelectedWindow] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -196,17 +197,21 @@ const ScreenRecorder = () => {
         screenStream = new MediaStream([canvasStream.getVideoTracks()[0]]);
       }
 
-      // Get microphone stream
-      const micStream = await navigator.mediaDevices.getUserMedia({
-        audio: true
-      });
-
-      // Combine the streams
-      const combinedStream = new MediaStream([
+      // Create combined stream with screen tracks
+      let combinedTracks = [
         ...screenStream.getVideoTracks(),
-        ...screenStream.getAudioTracks(),
-        ...micStream.getAudioTracks()
-      ]);
+        ...screenStream.getAudioTracks()
+      ];
+
+      // Add microphone if enabled
+      if (recordMicrophone) {
+        const micStream = await navigator.mediaDevices.getUserMedia({
+          audio: true
+        });
+        combinedTracks = [...combinedTracks, ...micStream.getAudioTracks()];
+      }
+
+      const combinedStream = new MediaStream(combinedTracks);
 
       recorderRef.current = new RecordRTC(combinedStream, {
         type: 'video',
@@ -366,6 +371,16 @@ const ScreenRecorder = () => {
       </div>
 
       <div className="controls">
+        <label className="mic-control">
+          <input
+            type="checkbox"
+            checked={recordMicrophone}
+            onChange={(e) => setRecordMicrophone(e.target.checked)}
+            disabled={isRecording}
+          />
+          Record Microphone
+        </label>
+        
         {!isRecording ? (
           <button onClick={startRecording}>Start Recording</button>
         ) : (

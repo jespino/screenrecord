@@ -26,6 +26,20 @@
   display: flex;
   gap: 1rem;
   justify-content: center;
+  align-items: center;
+}
+
+.mic-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.mic-control input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
 }
 
 button {
