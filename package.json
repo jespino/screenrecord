@@ -7,8 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "start": "npm run build && node gluon.js"
+    "preview": "vite preview", 
+    "start": "npm run build && node gluon.js",
+    "package": "npm run build && node build.js"
   },
   "dependencies": {
     "@gluon-framework/gluon": "^0.14.0",
