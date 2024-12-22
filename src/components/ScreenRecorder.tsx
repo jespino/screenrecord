@@ -19,10 +19,6 @@ const ScreenRecorder = () => {
     scaleY: number;
   } | null>(null);
 
-  const selectRegion = () => {
-    setIsSelectingRegion(true);
-    setSelectedRegion(null);
-  };
 
   const handleMouseDown = (e: MouseEvent) => {
     if (!isSelectingRegion || !videoRef.current) return;
@@ -212,7 +208,11 @@ const ScreenRecorder = () => {
       <div className="window-preview">
         <div>
           <button onClick={selectWindow}>Select Window</button>
-          <button onClick={selectRegion} disabled={!selectedWindow}>
+          <button 
+            onClick={() => setIsSelectingRegion(!isSelectingRegion)} 
+            disabled={!selectedWindow}
+            className={isSelectingRegion ? 'active' : ''}
+          >
             Select Region
           </button>
         </div>
