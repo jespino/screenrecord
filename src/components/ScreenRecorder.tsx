@@ -28,8 +28,9 @@ const ScreenRecorder = () => {
     if (!isSelectingRegion || !videoRef.current) return;
 
     const rect = videoRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    // Constrain coordinates within preview bounds
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
     setRegionStart({ x, y });
   };
 
@@ -37,8 +38,9 @@ const ScreenRecorder = () => {
     if (!isSelectingRegion || !regionStart || !videoRef.current) return;
 
     const rect = videoRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    // Constrain coordinates within preview bounds
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
     setRegionEnd({ x, y });
   };
 
