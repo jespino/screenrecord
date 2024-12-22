@@ -8,12 +8,25 @@ const ScreenRecorder = () => {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
+      // Get screen stream
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio: true
       });
 
-      recorderRef.current = new RecordRTC(stream, {
+      // Get microphone stream
+      const micStream = await navigator.mediaDevices.getUserMedia({
+        audio: true
+      });
+
+      // Combine the streams
+      const combinedStream = new MediaStream([
+        ...screenStream.getVideoTracks(),
+        ...screenStream.getAudioTracks(),
+        ...micStream.getAudioTracks()
+      ]);
+
+      recorderRef.current = new RecordRTC(combinedStream, {
         type: 'video',
         mimeType: 'video/webm'
       });
@@ -32,8 +45,11 @@ const ScreenRecorder = () => {
         if (blob) {
           setRecordedBlob(blob);
           // Stop all tracks
-          const tracks = recorderRef.current.getInternalRecorder().stream.getTracks();
-          tracks.forEach(track => track.stop());
+          // Stop all tracks from both screen and microphone
+          const stream = recorderRef.current.getInternalRecorder().stream;
+          stream.getTracks().forEach(track => {
+            track.stop();
+          });
         }
       });
       setIsRecording(false);
@@ -55,7 +71,8 @@ const ScreenRecorder = () => {
 
   return (
     <div className="screen-recorder">
-      <h2>Screen Recorder</h2>
+      <h2>Screen & Microphone Recorder</h2>
+      <p>Records both your screen and microphone audio</p>
       <div className="controls">
         {!isRecording ? (
           <button onClick={startRecording}>Start Recording</button>
