@@ -43,14 +43,49 @@ const ScreenRecorder = () => {
       const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
       setRegionEnd({ x, y });
     } else if (isDragging && dragStart && selectedRegion) {
-      // Handle region dragging
-      const newX = Math.max(0, Math.min(e.clientX - dragStart.x - rect.left, rect.width - selectedRegion.width));
-      const newY = Math.max(0, Math.min(e.clientY - dragStart.y - rect.top, rect.height - selectedRegion.height));
+      // Handle region dragging with proportional movement
+      const deltaX = e.clientX - rect.left - (dragStart.x + selectedRegion.x);
+      const deltaY = e.clientY - rect.top - (dragStart.y + selectedRegion.y);
+      
+      // Calculate new position while maintaining movement ratio
+      let newX = selectedRegion.x + deltaX;
+      let newY = selectedRegion.y + deltaY;
+      
+      // Check boundaries
+      const maxX = rect.width - selectedRegion.width;
+      const maxY = rect.height - selectedRegion.height;
+      
+      // If we hit a boundary, keep the ratio for the other axis
+      if (newX < 0) {
+        const ratio = newY / newX;
+        newX = 0;
+        newY = ratio * newX;
+      } else if (newX > maxX) {
+        const ratio = newY / newX;
+        newX = maxX;
+        newY = ratio * newX;
+      }
+      
+      if (newY < 0) {
+        const ratio = newX / newY;
+        newY = 0;
+        newX = ratio * newY;
+      } else if (newY > maxY) {
+        const ratio = newX / newY;
+        newY = maxY;
+        newX = ratio * newY;
+      }
       
       setSelectedRegion({
         ...selectedRegion,
         x: newX,
         y: newY
+      });
+      
+      // Update dragStart to maintain smooth movement
+      setDragStart({ 
+        x: e.clientX - rect.left - newX, 
+        y: e.clientY - rect.top - newY 
       });
     }
   };
