@@ -16,17 +16,27 @@ func checkChrome() error {
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
 	case "linux":
+		// Try Chrome first
 		cmd = exec.Command("which", "google-chrome")
+		if err := cmd.Run(); err != nil {
+			// If Chrome not found, try Chromium
+			cmd = exec.Command("which", "chromium")
+			if err := cmd.Run(); err != nil {
+				return fmt.Errorf("neither Chrome nor Chromium is installed. Please install one of them")
+			}
+		}
 	case "darwin":
 		cmd = exec.Command("which", "google-chrome")
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("Chrome is not installed. Please install it first")
+		}
 	case "windows":
 		cmd = exec.Command("where", "chrome.exe")
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("Chrome is not installed. Please install it first")
+		}
 	default:
 		return fmt.Errorf("unsupported operating system")
-	}
-
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("Chrome/Chromium is not installed. Please install it first")
 	}
 	return nil
 }
