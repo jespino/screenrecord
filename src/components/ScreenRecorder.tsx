@@ -269,15 +269,7 @@ const ScreenRecorder = () => {
           <div className="window-controls">
             <button onClick={selectWindow}>Select Window</button>
             <button 
-              onClick={() => {
-                if (!videoRef.current) return;
-                const rect = videoRef.current.getBoundingClientRect();
-                setIsSelectingRegion(!isSelectingRegion);
-                if (!isSelectingRegion) {
-                  setRegionStart({ x: 0, y: 0 });
-                  setRegionEnd({ x: rect.width, y: rect.height });
-                }
-              }} 
+              onClick={() => setIsSelectingRegion(!isSelectingRegion)} 
               disabled={!selectedWindow}
               className={isSelectingRegion ? 'active' : ''}
             >
