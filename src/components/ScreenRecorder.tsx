@@ -259,23 +259,43 @@ const ScreenRecorder = () => {
       <h2>Screen & Microphone Recorder</h2>
       
       <div className="window-preview">
-        <div>
-          <button onClick={selectWindow}>Select Window</button>
-          <button 
-            onClick={() => {
-              if (!videoRef.current) return;
-              const rect = videoRef.current.getBoundingClientRect();
-              setIsSelectingRegion(!isSelectingRegion);
-              if (!isSelectingRegion) {
-                setRegionStart({ x: 0, y: 0 });
-                setRegionEnd({ x: rect.width, y: rect.height });
-              }
-            }} 
-            disabled={!selectedWindow}
-            className={isSelectingRegion ? 'active' : ''}
-          >
-            Select Region
-          </button>
+        <div className="all-controls">
+          <div className="window-controls">
+            <button onClick={selectWindow}>Select Window</button>
+            <button 
+              onClick={() => {
+                if (!videoRef.current) return;
+                const rect = videoRef.current.getBoundingClientRect();
+                setIsSelectingRegion(!isSelectingRegion);
+                if (!isSelectingRegion) {
+                  setRegionStart({ x: 0, y: 0 });
+                  setRegionEnd({ x: rect.width, y: rect.height });
+                }
+              }} 
+              disabled={!selectedWindow}
+              className={isSelectingRegion ? 'active' : ''}
+            >
+              Select Region
+            </button>
+          </div>
+
+          <div className="recording-controls">
+            <label className="mic-control">
+              <input
+                type="checkbox"
+                checked={recordMicrophone}
+                onChange={(e) => setRecordMicrophone(e.target.checked)}
+                disabled={isRecording}
+              />
+              Record Microphone
+            </label>
+            
+            {!isRecording ? (
+              <button onClick={startRecording}>Start Recording</button>
+            ) : (
+              <button onClick={stopRecording}>Stop Recording</button>
+            )}
+          </div>
         </div>
           <>
             <div className="video-container"
@@ -364,23 +384,6 @@ const ScreenRecorder = () => {
           </>
       </div>
 
-      <div className="controls">
-        <label className="mic-control">
-          <input
-            type="checkbox"
-            checked={recordMicrophone}
-            onChange={(e) => setRecordMicrophone(e.target.checked)}
-            disabled={isRecording}
-          />
-          Record Microphone
-        </label>
-        
-        {!isRecording ? (
-          <button onClick={startRecording}>Start Recording</button>
-        ) : (
-          <button onClick={stopRecording}>Stop Recording</button>
-        )}
-      </div>
     </div>
   );
 };
