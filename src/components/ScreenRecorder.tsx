@@ -56,26 +56,9 @@ const ScreenRecorder = () => {
       const maxX = rect.width - selectedRegion.width;
       const maxY = rect.height - selectedRegion.height;
       
-      // If we hit a boundary, keep the ratio for the other axis
-      if (newX < 0) {
-        const ratio = newY / newX;
-        newX = 0;
-        newY = ratio * newX;
-      } else if (newX > maxX) {
-        const ratio = newY / newX;
-        newX = maxX;
-        newY = ratio * newX;
-      }
-      
-      if (newY < 0) {
-        const ratio = newX / newY;
-        newY = 0;
-        newX = ratio * newY;
-      } else if (newY > maxY) {
-        const ratio = newX / newY;
-        newY = maxY;
-        newX = ratio * newY;
-      }
+      // Clamp the position to boundaries without ratio adjustments
+      newX = Math.max(0, Math.min(newX, maxX));
+      newY = Math.max(0, Math.min(newY, maxY));
       
       setSelectedRegion({
         ...selectedRegion,
