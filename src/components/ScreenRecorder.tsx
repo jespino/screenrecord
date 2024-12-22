@@ -7,6 +7,7 @@ const ScreenRecorder = () => {
   const recorderRef = useRef<RecordRTC | null>(null);
   const [selectedWindow, setSelectedWindow] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const recordingPreviewRef = useRef<HTMLVideoElement>(null);
 
   const selectWindow = async () => {
     try {
@@ -55,6 +56,11 @@ const ScreenRecorder = () => {
         mimeType: 'video/webm'
       });
 
+      // Set up recording preview
+      if (recordingPreviewRef.current) {
+        recordingPreviewRef.current.srcObject = combinedStream;
+      }
+
       recorderRef.current.startRecording();
       setIsRecording(true);
     } catch (err) {
@@ -101,13 +107,24 @@ const ScreenRecorder = () => {
       <div className="window-preview">
         <button onClick={selectWindow}>Select Window</button>
         {selectedWindow && (
-          <video 
-            ref={videoRef} 
-            autoPlay 
-            playsInline 
-            muted 
-            className="preview-video"
-          />
+          <>
+            <video 
+              ref={videoRef} 
+              autoPlay 
+              playsInline 
+              muted 
+              className="preview-video"
+            />
+            {isRecording && (
+              <video
+                ref={recordingPreviewRef}
+                autoPlay
+                playsInline
+                muted
+                className="preview-video recording"
+              />
+            )}
+          </>
         )}
       </div>
 
