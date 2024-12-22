@@ -1,6 +1,6 @@
 # Screen Recorder
 
-A desktop application for recording your screen built with React, TypeScript, and Electron via the Gluon framework.
+A desktop application for recording your screen built with React, TypeScript, and the Gluon framework.
 
 ![Screen Recorder Screenshot](assets/screenshot.png)
 
