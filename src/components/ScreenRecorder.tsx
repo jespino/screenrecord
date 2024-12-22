@@ -106,15 +106,6 @@ const ScreenRecorder = () => {
               muted 
               className="preview-video"
             />
-            {isRecording && (
-              <video
-                ref={recordingPreviewRef}
-                autoPlay
-                playsInline
-                muted
-                className="preview-video recording"
-              />
-            )}
           </>
         )}
       </div>
