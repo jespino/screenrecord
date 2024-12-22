@@ -147,6 +147,12 @@ const ScreenRecorder = () => {
         };
       }
       
+      // Reset region selection when changing windows
+      setSelectedRegion(null);
+      setRegionStart(null);
+      setRegionEnd(null);
+      setIsSelectingRegion(false);
+      
       setSelectedWindow(stream);
     } catch (err) {
       console.error('Error selecting window:', err);
