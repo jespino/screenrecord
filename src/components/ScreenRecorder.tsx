@@ -10,17 +10,34 @@ const ScreenRecorder = () => {
 
   const selectWindow = async () => {
     try {
+      // Stop any existing stream
+      if (selectedWindow) {
+        selectedWindow.getTracks().forEach(track => track.stop());
+      }
+      
+      // Reset video element
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+
       const stream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio: false
       });
       
-      setSelectedWindow(stream);
-      
+      // Ensure video element is ready
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        await videoRef.current.play().catch(e => console.error('Error playing video:', e));
+        videoRef.current.onloadedmetadata = async () => {
+          try {
+            await videoRef.current?.play();
+          } catch (e) {
+            console.error('Error playing video:', e);
+          }
+        };
       }
+      
+      setSelectedWindow(stream);
     } catch (err) {
       console.error('Error selecting window:', err);
     }
