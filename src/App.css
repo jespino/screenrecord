@@ -53,6 +53,11 @@ button {
   gap: 1rem;
 }
 
+.window-preview > div:first-child {
+  display: flex;
+  gap: 1rem;
+}
+
 .preview-video {
   max-width: 100%;
   border-radius: 4px;
