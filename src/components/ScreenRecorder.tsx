@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect, MouseEvent } from 'react';
+import { useState, useRef, MouseEvent } from 'react';
 import RecordRTC from 'recordrtc';
 
 const ScreenRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
-  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const [, setRecordedBlob] = useState<Blob | null>(null);
   const [recordMicrophone, setRecordMicrophone] = useState(true);
   const recorderRef = useRef<RecordRTC | null>(null);
   const [selectedWindow, setSelectedWindow] = useState<MediaStream | null>(null);
@@ -223,7 +223,7 @@ const ScreenRecorder = () => {
           // Stop all tracks from both screen and microphone
           const internalRecorder = recorderRef.current.getInternalRecorder();
           if (internalRecorder && internalRecorder.stream) {
-            internalRecorder.stream.getTracks().forEach(track => {
+            internalRecorder.stream.getTracks().forEach((track: MediaStreamTrack) => {
               track.stop();
             });
           }
