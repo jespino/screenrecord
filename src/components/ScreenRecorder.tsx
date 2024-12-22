@@ -10,8 +10,15 @@ const ScreenRecorder = () => {
     try {
       // Get screen stream
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: true
+        video: {
+          displaySurface: 'monitor',
+          cursor: 'always',
+          selfBrowserSurface: 'exclude'
+        },
+        audio: true,
+        preferCurrentTab: false,
+        selfBrowserSurface: 'exclude',
+        systemAudio: 'include'
       });
 
       // Get microphone stream
