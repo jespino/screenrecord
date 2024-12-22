@@ -238,22 +238,19 @@ const ScreenRecorder = () => {
               track.stop();
             });
           }
+          
+          // Automatically download the recording
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `screen-recording-${Date.now()}.webm`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
         }
       });
       setIsRecording(false);
-    }
-  };
-
-  const downloadRecording = () => {
-    if (recordedBlob) {
-      const url = URL.createObjectURL(recordedBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `screen-recording-${Date.now()}.webm`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
     }
   };
 
@@ -385,9 +382,6 @@ const ScreenRecorder = () => {
           <button onClick={startRecording}>Start Recording</button>
         ) : (
           <button onClick={stopRecording}>Stop Recording</button>
-        )}
-        {recordedBlob && (
-          <button onClick={downloadRecording}>Download Recording</button>
         )}
       </div>
     </div>
