@@ -115,16 +115,16 @@ const ScreenRecorder = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
-        canvas.width = selectedRegion.width;
-        canvas.height = selectedRegion.height;
+        // Set canvas size to match the selected region's actual size
+        canvas.width = selectedRegion.width * selectedRegion.scaleX;
+        canvas.height = selectedRegion.height * selectedRegion.scaleY;
         
-        // Create a stream from the canvas
-        const canvasStream = canvas.captureStream();
+        // Create a stream from the canvas with proper FPS
+        const canvasStream = canvas.captureStream(30); // 30 FPS
         
         // Update canvas with cropped video frame
         const drawFrame = () => {
           if (ctx && videoRef.current) {
-            // Use scaled coordinates for cropping from the actual window size
             ctx.drawImage(
               videoRef.current,
               selectedRegion.x * selectedRegion.scaleX,
@@ -136,12 +136,14 @@ const ScreenRecorder = () => {
               canvas.width,
               canvas.height
             );
+            requestAnimationFrame(drawFrame);
           }
-          requestAnimationFrame(drawFrame);
         };
         
         drawFrame();
-        screenStream = canvasStream;
+        
+        // Only use the video track from canvas stream
+        screenStream = new MediaStream([canvasStream.getVideoTracks()[0]]);
       }
 
       // Get microphone stream
