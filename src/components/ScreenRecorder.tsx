@@ -291,7 +291,7 @@ const ScreenRecorder = () => {
             </label>
             
             {!isRecording ? (
-              <button onClick={startRecording}>Start Recording</button>
+              <button onClick={startRecording} disabled={!selectedWindow}>Start Recording</button>
             ) : (
               <button onClick={stopRecording}>Stop Recording</button>
             )}
