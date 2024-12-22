@@ -1,4 +1,4 @@
-const { compile } = require('nexe')
+import { compile } from 'nexe';
 
 async function build() {
   try {
