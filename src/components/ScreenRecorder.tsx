@@ -15,6 +15,8 @@ const ScreenRecorder = () => {
     y: number;
     width: number;
     height: number;
+    scaleX: number;
+    scaleY: number;
   } | null>(null);
 
   const selectRegion = () => {
@@ -41,14 +43,23 @@ const ScreenRecorder = () => {
   };
 
   const handleMouseUp = () => {
-    if (!isSelectingRegion || !regionStart || !regionEnd) return;
+    if (!isSelectingRegion || !regionStart || !regionEnd || !videoRef.current || !selectedWindow) return;
+
+    const videoElement = videoRef.current;
+    const stream = selectedWindow;
+    const videoTrack = stream.getVideoTracks()[0];
+    const settings = videoTrack.getSettings();
+    
+    // Calculate scale factors between preview and actual window size
+    const scaleX = settings.width! / videoElement.clientWidth;
+    const scaleY = settings.height! / videoElement.clientHeight;
 
     const x = Math.min(regionStart.x, regionEnd.x);
     const y = Math.min(regionStart.y, regionEnd.y);
     const width = Math.abs(regionEnd.x - regionStart.x);
     const height = Math.abs(regionEnd.y - regionStart.y);
 
-    setSelectedRegion({ x, y, width, height });
+    setSelectedRegion({ x, y, width, height, scaleX, scaleY });
     setIsSelectingRegion(false);
     setRegionStart(null);
     setRegionEnd(null);
@@ -113,12 +124,13 @@ const ScreenRecorder = () => {
         // Update canvas with cropped video frame
         const drawFrame = () => {
           if (ctx && videoRef.current) {
+            // Use scaled coordinates for cropping from the actual window size
             ctx.drawImage(
               videoRef.current,
-              selectedRegion.x,
-              selectedRegion.y,
-              selectedRegion.width,
-              selectedRegion.height,
+              selectedRegion.x * selectedRegion.scaleX,
+              selectedRegion.y * selectedRegion.scaleY,
+              selectedRegion.width * selectedRegion.scaleX,
+              selectedRegion.height * selectedRegion.scaleY,
               0,
               0,
               canvas.width,
