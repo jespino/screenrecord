@@ -257,7 +257,6 @@ const ScreenRecorder = () => {
   return (
     <div className="screen-recorder">
       <h2>Screen & Microphone Recorder</h2>
-      <p>Records both your screen and microphone audio</p>
       
       <div className="window-preview">
         <div>
