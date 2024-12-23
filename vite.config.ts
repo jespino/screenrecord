@@ -9,5 +9,8 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     emptyOutDir: true,
+    rollupOptions: {
+      external: ['@gluon-framework/gluon']
+    }
   }
 })
