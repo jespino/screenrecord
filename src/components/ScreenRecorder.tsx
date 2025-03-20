@@ -21,6 +21,7 @@ const ScreenRecorder = () => {
   } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
+  const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);
 
 
   const handleMouseDown = (e: MouseEvent) => {
@@ -37,6 +38,12 @@ const ScreenRecorder = () => {
     if (!videoRef.current) return;
     
     const rect = videoRef.current.getBoundingClientRect();
+    
+    // Update cursor position for dimension display
+    setCursorPosition({ 
+      x: Math.max(0, Math.min(e.clientX - rect.left, rect.width)),
+      y: Math.max(0, Math.min(e.clientY - rect.top, rect.height))
+    });
 
     if (isSelectingRegion && regionStart) {
       // Handle region selection
@@ -307,7 +314,21 @@ const ScreenRecorder = () => {
                     width: Math.abs(regionEnd.x - regionStart.x) + 'px',
                     height: Math.abs(regionEnd.y - regionStart.y) + 'px'
                   }}
-                />
+                >
+                  {isSelectingRegion && cursorPosition && (
+                    <div 
+                      className="dimension-indicator resizing"
+                      style={{
+                        left: cursorPosition.x - Math.min(regionStart.x, regionEnd.x) + 15 + 'px',
+                        top: cursorPosition.y - Math.min(regionStart.y, regionEnd.y) - 25 + 'px'
+                      }}
+                    >
+                      {Math.round(Math.abs(regionEnd.x - regionStart.x) * (selectedWindow && videoRef.current ? selectedWindow.getVideoTracks()[0].getSettings().width! / videoRef.current.clientWidth : 1))}
+                      × 
+                      {Math.round(Math.abs(regionEnd.y - regionStart.y) * (selectedWindow && videoRef.current ? selectedWindow.getVideoTracks()[0].getSettings().height! / videoRef.current.clientHeight : 1))}
+                    </div>
+                  )}
+                </div>
               )}
               {selectedRegion && (
                 <div 
@@ -330,6 +351,9 @@ const ScreenRecorder = () => {
                     }
                   }}
                 >
+                  <div className="dimension-indicator">
+                    {Math.round(selectedRegion.width * selectedRegion.scaleX)} × {Math.round(selectedRegion.height * selectedRegion.scaleY)}
+                  </div>
                   <div 
                     className="resize-handle top-left"
                     onMouseDown={(e) => {
