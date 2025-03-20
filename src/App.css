@@ -128,7 +128,7 @@ button {
 .dimension-indicator {
   position: absolute;
   top: 5px;
-  left: 5px;
+  right: 5px;
   background-color: rgba(0, 0, 0, 0.7);
   color: white;
   padding: 2px 6px;
